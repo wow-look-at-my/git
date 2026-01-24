@@ -146,6 +146,15 @@ static int post_checkout_hook(struct commit *old_commit, struct commit *new_comm
 
 }
 
+static int pre_checkout_hook(struct commit *old_commit, struct commit *new_commit,
+			     int changed)
+{
+	return run_hooks_l(the_repository, "pre-checkout",
+			   oid_to_hex(old_commit ? &old_commit->object.oid : null_oid(the_hash_algo)),
+			   oid_to_hex(new_commit ? &new_commit->object.oid : null_oid(the_hash_algo)),
+			   changed ? "1" : "0", NULL);
+}
+
 static int update_some(const struct object_id *oid, struct strbuf *base,
 		       const char *pathname, unsigned mode, void *context UNUSED)
 {
@@ -633,6 +642,14 @@ static int checkout_paths(const struct checkout_opts *opts,
 	if (errs)
 		return 1;
 
+	/* Run the pre-checkout hook before modifying the worktree */
+	refs_read_ref_full(get_main_ref_store(the_repository), "HEAD", 0,
+			   &rev, NULL);
+	head = lookup_commit_reference_gently(the_repository, &rev, 1);
+
+	if (pre_checkout_hook(head, head, 0))
+		return 1;
+
 	/* Now we are committed to check them out */
 	if (opts->checkout_worktree)
 		errs |= checkout_worktree(opts, new_branch_info);
@@ -660,10 +677,6 @@ static int checkout_paths(const struct checkout_opts *opts,
 		 */
 		rollback_lock_file(&lock_file);
 	}
-
-	refs_read_ref_full(get_main_ref_store(the_repository), "HEAD", 0,
-			   &rev, NULL);
-	head = lookup_commit_reference_gently(the_repository, &rev, 1);
 
 	errs |= post_checkout_hook(head, head, 0);
 	return errs;
@@ -1213,6 +1226,13 @@ static int switch_branches(const struct checkout_opts *opts,
 
 		if (opts->only_merge_on_switching_branches)
 			do_merge = 0;
+	}
+
+	ret = pre_checkout_hook(old_branch_info.commit,
+				new_branch_info->commit, 1);
+	if (ret) {
+		branch_info_release(&old_branch_info);
+		return ret;
 	}
 
 	if (do_merge) {
