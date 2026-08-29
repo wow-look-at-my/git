@@ -37,6 +37,7 @@ TEMPLATES += description
 TEMPLATES += hooks/applypatch-msg.sample
 TEMPLATES += hooks/commit-msg.sample
 TEMPLATES += hooks/fsmonitor-watchman.sample
+TEMPLATES += hooks/post-reset.sample
 TEMPLATES += hooks/post-update.sample
 TEMPLATES += hooks/pre-applypatch.sample
 TEMPLATES += hooks/pre-commit.sample

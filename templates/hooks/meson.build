@@ -2,6 +2,7 @@ hooks = [
   'applypatch-msg.sample',
   'commit-msg.sample',
   'fsmonitor-watchman.sample',
+  'post-reset.sample',
   'post-update.sample',
   'pre-applypatch.sample',
   'pre-commit.sample',

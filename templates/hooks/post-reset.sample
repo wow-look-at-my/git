@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# An example hook script to bring the submodules of the superproject back
+# in line with the commit "git reset" has just moved HEAD to.  Called by
+# "git reset" with three arguments: the object name of the previous HEAD,
+# the object name of the new HEAD, and the mode of the reset ("soft",
+# "mixed", "hard", "merge" or "keep").  Its exit status is ignored.
+#
+# To enable this hook, rename this file to "post-reset".
+
+mode="$3"
+
+case "$mode" in
+soft | mixed)
+	# Neither mode touches the working tree, so the submodule working
+	# trees cannot have gone stale.
+	exit 0
+	;;
+esac
+
+# "git submodule update" checks out inside each submodule, which can run
+# this hook again; do not recurse into ourselves.
+if test -n "$GIT_POST_RESET_HOOK"
+then
+	exit 0
+fi
+GIT_POST_RESET_HOOK=1
+export GIT_POST_RESET_HOOK
+
+# Unlike the blanket recursion of "submodule.recurse", "git submodule
+# update" honors the "update = none" and "ignore = all" settings of an
+# individual submodule and leaves such a submodule alone.
+exec git submodule update --init --recursive
