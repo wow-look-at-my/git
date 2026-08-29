@@ -17,6 +17,7 @@
 #include "gettext.h"
 #include "hash.h"
 #include "hex.h"
+#include "hook.h"
 #include "lockfile.h"
 #include "object.h"
 #include "pretty.h"
@@ -341,9 +342,10 @@ int cmd_reset(int argc,
 	int reset_type = NONE, update_ref_status = 0, quiet = 0;
 	int no_refresh = 0;
 	int patch_mode = 0, pathspec_file_nul = 0, unborn;
+	int run_post_reset = 0;
 	const char *rev;
 	char *pathspec_from_file = NULL;
-	struct object_id oid;
+	struct object_id oid, old_head_oid;
 	struct pathspec pathspec;
 	int intent_to_add = 0;
 	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
@@ -532,6 +534,13 @@ int cmd_reset(int argc,
 	}
 
 	if (!pathspec.nr && !unborn) {
+		/*
+		 * The post-reset hook is told where HEAD used to point,
+		 * so grab that before ORIG_HEAD and HEAD are updated.
+		 */
+		run_post_reset = !repo_get_oid(the_repository, "HEAD",
+					       &old_head_oid);
+
 		/* Any resets without paths update HEAD to the head being
 		 * switched to, saving the previous head in ORIG_HEAD before. */
 		update_ref_status = reset_refs(rev, &oid);
@@ -541,6 +550,19 @@ int cmd_reset(int argc,
 	}
 	if (!pathspec.nr)
 		remove_branch_state(the_repository, 0);
+
+	/*
+	 * Tell the hook about a reset that could have changed the tree
+	 * HEAD points at, even when HEAD did not move; a "git reset --hard"
+	 * with no revision is the usual way to discard such changes.  The
+	 * hook has nothing to do without a working tree, and its exit
+	 * status is ignored.
+	 */
+	if (run_post_reset && !update_ref_status &&
+	    repo_get_work_tree(the_repository))
+		run_hooks_l(the_repository, "post-reset",
+			    oid_to_hex(&old_head_oid), oid_to_hex(&oid),
+			    reset_type_names[reset_type], NULL);
 
 	discard_index(the_repository->index);
 
