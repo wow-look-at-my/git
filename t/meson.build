@@ -877,6 +877,7 @@ integration_tests = [
   't7111-reset-table.sh',
   't7112-reset-submodule.sh',
   't7113-post-index-change-hook.sh',
+  't7114-post-reset-hook.sh',
   't7201-co.sh',
   't7300-clean.sh',
   't7301-clean-interactive.sh',
