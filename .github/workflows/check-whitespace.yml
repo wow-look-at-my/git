@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   check-whitespace:
-    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
       with:

@@ -18,14 +18,12 @@ jobs:
     env:
       CC: clang
       jobname: ClangFormat
-    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
-    # The self-hosted runner image ships empty apt lists, and the ClangFormat case installs without an update.
-    - run: sudo apt-get update
     - run: ci/install-dependencies.sh
 
     - name: git clang-format
