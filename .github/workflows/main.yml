@@ -22,7 +22,7 @@ jobs:
   ci-config:
     name: config
     if: vars.CI_BRANCHES == '' || contains(vars.CI_BRANCHES, github.ref_name)
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-latest' }}
     outputs:
       enabled: ${{ steps.check-ref.outputs.enabled }}${{ steps.skip-if-redundant.outputs.enabled }}
       skip_concurrent: ${{ steps.check-ref.outputs.skip_concurrent }}
@@ -360,7 +360,7 @@ jobs:
     env:
       CC: clang
       CI_JOB_IMAGE: ubuntu-latest
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v5
     - run: ci/install-dependencies.sh
@@ -419,7 +419,7 @@ jobs:
       CC: ${{matrix.vector.cc}}
       CI_JOB_IMAGE: ${{matrix.vector.image}}
       CUSTOM_PATH: /custom
-    runs-on: ${{ vars.CI_RUNNER_DIND || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER_DIND || 'ubuntu-latest' }}
     container: ${{matrix.vector.image}}
     steps:
     - name: prepare libc6 for actions
@@ -459,7 +459,7 @@ jobs:
     env:
       jobname: StaticAnalysis
       CI_JOB_IMAGE: ubuntu-22.04
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-22.04' }}
+    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-22.04' }}
     concurrency:
       group: static-analysis-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
@@ -474,7 +474,7 @@ jobs:
     env:
       jobname: RustAnalysis
       CI_JOB_IMAGE: ubuntu:rolling
-    runs-on: ${{ vars.CI_RUNNER_DIND || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER_DIND || 'ubuntu-latest' }}
     container: ubuntu:rolling
     concurrency:
       group: rust-analysis-${{ github.ref }}
@@ -489,7 +489,7 @@ jobs:
     env:
       jobname: sparse
       CI_JOB_IMAGE: ubuntu-22.04
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-22.04' }}
+    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-22.04' }}
     concurrency:
       group: sparse-${{ github.ref }}
       cancel-in-progress: ${{ needs.ci-config.outputs.skip_concurrent == 'yes' }}
@@ -508,7 +508,7 @@ jobs:
     env:
       jobname: Documentation
       CI_JOB_IMAGE: ubuntu-latest
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v5
     - run: ci/install-dependencies.sh
