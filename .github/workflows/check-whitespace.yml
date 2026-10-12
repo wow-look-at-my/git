@@ -17,11 +17,7 @@ concurrency:
 
 jobs:
   check-whitespace:
-<<<<<<< HEAD
-    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-latest' }}
-=======
     runs-on: ${{ github.event.repository.visibility == 'public' && 'ubuntu-latest' || vars.CI_RUNNER || 'ubuntu-latest' }}
->>>>>>> origin/master
     steps:
     - uses: actions/checkout@v5
       with:

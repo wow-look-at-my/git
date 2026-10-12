@@ -14,11 +14,7 @@ jobs:
       endsWith(github.repository, '/git-po') ||
       contains(github.head_ref, 'l10n') ||
       contains(github.ref, 'l10n')
-<<<<<<< HEAD
-    runs-on: ${{ github.event.repository.private && vars.CI_RUNNER || 'ubuntu-latest' }}
-=======
     runs-on: ${{ github.event.repository.visibility == 'public' && 'ubuntu-latest' || vars.CI_RUNNER || 'ubuntu-latest' }}
->>>>>>> origin/master
     permissions:
       pull-requests: write
     steps:
